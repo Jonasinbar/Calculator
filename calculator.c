@@ -9,11 +9,9 @@
 #include "calculator.h"
 #include "calculatorTest.h"
 
-
-
 /**
  *  This fuction takes a uint64_t number and checks
- *  if it is bigger than INT_MAX, that is, it checks
+ *  if it is bigger than INT32_MAX, that is, it checks
  *  if result can be contained in an int32_t without overflowing
  *  it returns its input as an int32_t if result can be contained in
  *  an int32_t witout overflowing, else it returns -1 that will never be taken
@@ -22,7 +20,7 @@
  *  @return the input as an ,int32_t or -1 and raise flag NO_ERROR.
  */
 int32_t checkOverflowAndReturnResult(uint64_t result) {
-	if (result > INT_MAX) {
+	if (result > INT32_MAX) {
 		ERROR_CODE = intOverflow;
 		return -1;//doesnt matter
 	}
@@ -48,7 +46,7 @@ double add(int32_t firstInt, int32_t secondInt) {
 /**
  *  This fuction takes two int32_t as input, calculate their substraction
  *  and return the result, note that in our case, substract
- *  cannot int32_t overflow because it takes as input two positive ints < INT_MAX
+ *  cannot int32_t overflow because it takes as input two positive ints < INT32_MAX
  *  @param int32_t firstInt, int32_t secondInt, the numbers to be substracted.
  *  @return firstInt - secondInt, the substraction as int32_t.
  */
@@ -62,7 +60,7 @@ double substract(int32_t firstInt, int32_t secondInt) {
  *  that will return the input as int32_t if the result does not int32_t overflow,
  *  or it will return -1 and raise flag NO_ERROR so that
  *  the result will not be taked into account
- *  note that INT_MAX*INT_MAX < LLONG_MAX, then result cannot llong overflow.
+ *  note that INT32_MAX*INT32_MAX < LLONG_MAX, then result cannot llong overflow.
  *  @param int32_t firstInt, int32_t secondInt, the numbers to be multiply.
  *  @return the multiplication of the number as int32_t, or -1 and raise flag NO_ERROR.
  */
@@ -76,7 +74,7 @@ double multiply(int32_t firstInt, int32_t secondInt) {
 /**
  *  This fuction takes two int32_t as input, calculate their division as a
  *  double. Note that in our case, divide cannot double overflow because it takes
- *  as input two ints < INT_MAX and whole numers.
+ *  as input two ints < INT32_MAX and whole numers.
  *  if case of division by 0, we will return -1 and raise flag NO_ERROR so that
  *  the result will not be taked into account.
  *  @param int32_t firstInt, int32_t secondInt, the numbers to be divided.
@@ -93,11 +91,15 @@ double divide(int32_t firstInt, int32_t secondInt) {
 /**
  *  This fuction takes two int32_t as input, calculate their modulo
  *  and return the result, note that in our case, modulo
- *  cannot int32_t overflow because it takes as input two positive ints < INT_MAX
+ *  cannot int32_t overflow because it takes as input two positive ints < INT32_MAX
  *  @param int32_t firstInt, int32_t secondInt, the numbers to be substracted.
  *  @return firstInt % secondInt, the modulo as int32_t.
  */
 double modulo(int32_t firstInt, int32_t secondInt) {
+	if (secondInt == 0) {
+		ERROR_CODE = divisionByZero;
+		return -1;//doesnt matter
+	}
 	return (double)(firstInt % secondInt);
 }
 
@@ -115,8 +117,7 @@ double modulo(int32_t firstInt, int32_t secondInt) {
  *  @return the powering of the number as int32_t, or -1 and flag NO_ERROR will be raised.
  */
 double power(int32_t firstInt, int32_t secondInt) {
-	//pointer to fucntion declaration
-	int32_t (*ptrMultiply)(int32_t, int32_t) = &multiply;
+	
 	//basic case, power of 0 
 	if (secondInt == 0) {
 		return 1;
@@ -129,7 +130,7 @@ double power(int32_t firstInt, int32_t secondInt) {
 	//here we do firstInt*firstInt*...*firstInt, 'secondInt' times
 	for (int32_t i = 0; i < secondInt - 1; ++i)
 	{
-		result = (*ptrMultiply)((int)result, firstInt); //our multiply is safe from int32_t overflow
+		result = multiply((int)result, firstInt); //our multiply is safe from int32_t overflow
 		//if flag errorCode was raised by multiply, we better stop now
 		if (ERROR_CODE) {
 			return -1; //doesnt matter
@@ -140,23 +141,21 @@ double power(int32_t firstInt, int32_t secondInt) {
 /**
  *  This fuction takes two int32_t as input, calculate the secondInt'th root of firstInt as a
  *  double. To do se, is uses the fuction pow() from math.h
- *  as both numbers are positive ints < INT_MAX, the result can't overflow here
+ *  as both numbers are positive ints < INT32_MAX, the result can't overflow here
  *  @param int32_t firstInt, the base, int32_t secondInt the nth root.
  *  @return the secondInt'th root of firstInt as a double
  */
 double nthRoot(int32_t firstInt, int32_t secondInt) {
-	//pointer to fucntion declaration
-	double (*ptrPow)(double, double) = &pow;
 	//as both numbers are positive ints, the result can't overflow here
 	// not that the nth root of x is equal to x to the power of 1/n
-	return ((*ptrPow)((double)firstInt, 1.0 / (double)secondInt));
+	return pow((double)firstInt, 1.0 / (double)secondInt);
 }
 
 
 /**
  *  This fuction takes two int32_t as input, calculate their euclideanDivision as a
  *  int32_t. Note that in our case, euclideanDivision cannot int32_t overflow because it takes
- *  as input two ints < INT_MAX and whole numers.
+ *  as input two ints < INT32_MAX and whole numers.
  *  if case of euclideanDivision by 0, we will return -1 and raise flag NO_ERROR so that
  *  the result will not be taked into account.
  *  @param int32_t firstInt, int32_t secondInt, the numbers to be divided.
@@ -215,11 +214,11 @@ int chooseRightOperation(char operator) {
  */
 double executeOperation(int32_t first, char operator, int32_t second) {
 	double (*fun_ptr_arr[])(int32_t, int32_t) = { add, substract, multiply, divide, modulo, nthRoot, power, euclideanDivision };
-	int rightOerationNumber = chooseRightOperation(operator);
-	if (rightOerationNumber == -1) {
+	int rightOperationNumber = chooseRightOperation(operator);
+	if (rightOperationNumber == -1) {
 		return -1; //doesnt matter, in this case ERROR_CODE flage is raised
 	}
-	return (*fun_ptr_arr[rightOerationNumber])(first, second);
+	return (*fun_ptr_arr[rightOperationNumber])(first, second);
 }
 
 
@@ -233,8 +232,18 @@ double executeOperation(int32_t first, char operator, int32_t second) {
  */
 uint64_t stringConvertToLong(char* stringNbr) {
 	uint64_t number = 0;
+	for (int i = 0; i < strnlen(stringNbr, MAXSIZEINPUT); i++) {
+		if ((stringNbr[i] >= '0') && (stringNbr[i] <= '9')) {
+			number = (number*10) + (stringNbr[i] - '0');
+		}
 
-	for (char* digit = stringNbr; *digit; ++digit)
+		else {
+			//stringNbr is not really a number
+			ERROR_CODE = invalidInput;
+			return -1;//doesnt matter
+		}
+	}
+	/*for (char* digit = stringNbr; *digit; ++digit)
 	{
 		if( *digit >= '0' && *digit <= '9' ){
 		number = number * 10 + *digit - '0';
@@ -245,7 +254,7 @@ uint64_t stringConvertToLong(char* stringNbr) {
 			ERROR_CODE = invalidInput;
 			return -1;//doesnt matter
 		}
-	}
+	}*/
 	return number;
 }
 /**
@@ -256,7 +265,7 @@ uint64_t stringConvertToLong(char* stringNbr) {
  *  @return 1 if the numbers are not int32_t-overflowing, 0 else
  */
 int32_t verifyNumbersAreInt(uint64_t firstLongNbr, uint64_t secondLongNbr) {
-	return !(firstLongNbr > INT_MAX || secondLongNbr > INT_MAX);
+	return !(firstLongNbr > INT32_MAX || secondLongNbr > INT32_MAX);
 }
 
 
@@ -286,7 +295,7 @@ int32_t inputIsValid(char* firstStr, char* secondStr, int32_t* firstNbrInt, int3
 		return 0;
 	}
 	//we dont support negative numbers
-	if (*firstStr == '-' || *secondStr == '-') {
+	if (firstStr[0] == '-' || secondStr[0] == '-') {
 		ERROR_CODE = invalidInput;
 		return 0;
 	}
@@ -327,13 +336,9 @@ int32_t inputIsValid(char* firstStr, char* secondStr, int32_t* firstNbrInt, int3
  */
 double calculate(char* firstStr, char operator, char* secondStr,
 		int32_t* firstNbrInt, int32_t* secondNbrInt) {
-	//pointer to fucntion declaration
-	int32_t (*ptrInputIsValid)(char*, char*, int32_t*, int32_t*) = &inputIsValid;
-	double (*ptrExecuteOperation)(int32_t*, char, int32_t*) = &executeOperation;
 
-
-	if ((*ptrInputIsValid)(firstStr, secondStr, firstNbrInt, secondNbrInt)) {
-		return (*ptrExecuteOperation)(*firstNbrInt, operator, *secondNbrInt);
+	if (inputIsValid(firstStr, secondStr, firstNbrInt, secondNbrInt)) {
+		return executeOperation(*firstNbrInt, operator, *secondNbrInt);
 	}
 	else {
 		ERROR_CODE = invalidInput;
@@ -394,13 +399,12 @@ void printResult(double result) {
  
  */
 double mainForDemo() {
-	//pointer to fucntion declaration
-	double (*ptrCalculate) (char*, char, char*, int32_t*, int32_t*) = &calculate;
-	void (*ptrPrintResult) (double) = &printResult;
+	char operator = ' ';
+	char* firstStr;
+	firstStr = malloc(MAXSIZEINPUT);
+	char* secondStr;
+	secondStr = malloc(MAXSIZEINPUT);
 
-	char* operator = malloc((MAXSIZEINPUT + 1) * sizeof(char));
-	char* firstStr = malloc((MAXSIZEINPUT + 1) * sizeof(char));
-	char* secondStr = malloc((MAXSIZEINPUT + 1) * sizeof(char));
 	int32_t firstNbrInt, secondNbrInt; // these are our int32_t buffers that will host the parsed input 
 	double result = 0;
 
@@ -408,22 +412,13 @@ double mainForDemo() {
 	scanf_s("%s", firstStr, MAXSIZEINPUT+1);
 
 	printf("Insert operation: ");
-	scanf_s("%s", operator, MAXSIZEINPUT);
+	scanf_s(" %c", &operator, 1);
 
 	printf("Insert second number: ");
-	scanf_s("%s", secondStr, MAXSIZEINPUT+1);
-	//if the operator length is not 1 char, we better stop, raise ERROR_CODE flag 
-	if (strnlen(operator, MAXSIZEINPUT) != 1) {
-		ERROR_CODE = invalidOperator;
-	}
-	else{
-		//here begins the calculation
-		result = (*ptrCalculate)(firstStr, operator[0], secondStr, &firstNbrInt, &secondNbrInt);
-	}
-	//either print the result or print the error
-	(*ptrPrintResult)(result);
-
-	
+	scanf_s("%s", secondStr, MAXSIZEINPUT+1);	
+	result = calculate(firstStr, operator, secondStr, &firstNbrInt, &secondNbrInt);
+	//print result will either print the error if there is or the result if everything went well
+	printResult(result);
 	return 0;
 }
 

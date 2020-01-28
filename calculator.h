@@ -11,15 +11,19 @@
 
 #include <stdio.h>
 #include <stdlib.h> //for exit()
-#include <limits.h> //for INT_MAX
+#include <limits.h> //for INT32_MAX
 #include <string.h> //for strspn and strlen
 #include <math.h> // for pow
 #include <stdint.h>
 #include <float.h>
-#define MAXSIZEINPUT 10 //because the INT_MAX is 10 digit, if we have more that 10 digit, we have an overflow for sure.
+#define MAXSIZEINPUT 10 //because the INT32_MAX is 10 digit, if we have more that 10 digit, we have an overflow for sure.
 
 enum errorCodes {
-	noError=0, divisionByZero = 1, intOverflow = 2, invalidInput = 3, invalidOperator = 4
+	noError=0, 
+	divisionByZero = 1, 
+	intOverflow = 2, 
+	invalidInput = 3, 
+	invalidOperator = 4
 };
 int chooseRightOperation(char);
 char* getErroryName(enum Days day);
