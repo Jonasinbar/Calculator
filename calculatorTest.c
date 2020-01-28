@@ -7,6 +7,7 @@
 //
 #include "calculator.h"
 #include "calculatorTest.h"
+
 #define NBR_OF_TESTS 10
 ERROR_CODE= noError; //global variable
 
@@ -21,22 +22,22 @@ struct testElement {
     char operator;
     char *second;
     double expectedResult;
-    int expectedErrorCode;
+    int32_t expectedErrorCode;
 };
 
 /**
  *  This fuction executes the function calculate() on one given test element and compare
  *  the expected result of the test element wit the result that 
- *  the fucntion calculate() gave us two int as input.
+ *  the fucntion calculate() gave us two int32_t as input.
  *  in case of ERROR_CODE being raised, it returns -1 and we take care of this in our main function
  *  @param struct testElement, the test element to be evaluated
  *  @return 1 if our test element passed, 0 if test failed, -1 if an ERROR_CODE was raised during execution
  */
-int runTestOnOneElement(struct testElement *testElement){
+int32_t runTestOnOneElement(struct testElement *testElement){
 	ERROR_CODE = noError;//just to make sure
 	//pointer to fucntion declaration
-	double (*ptrCalculate) (char*, char, char*, int*, int*) = &calculate;
-    int firstNbrInt,secondNbrInt;// these are our int buffers that will host the parsed input 
+	double (*ptrCalculate) (char*, char, char*, int32_t*, int32_t*) = &calculate;
+    int32_t firstNbrInt,secondNbrInt;// these are our int32_t buffers that will host the parsed input 
     double actualResult = (*ptrCalculate)(testElement->first, testElement->operator, testElement->second, &firstNbrInt, &secondNbrInt);
 	if(ERROR_CODE){
 		return -1;
@@ -46,12 +47,12 @@ int runTestOnOneElement(struct testElement *testElement){
 
 /**
  *  This fuction set values for a given struct passed by reference and returns this struct.
- *  @param struct testElement **, char* first, char operator, char* second, int error_code and
+ *  @param struct testElement **, char* first, char operator, char* second, int32_t error_code and
  *  double expectedResult, all values to put in the struct
  *  @return the given struct filled with given values
  */
 static void setValues(struct testElement **testElement, char* first, char operator, char* second,
-                      int error_code, double expectedResult) {
+                      int32_t error_code, double expectedResult) {
     (*testElement)->first = first;
     (*testElement)->second = second;
     (*testElement)->operator = operator;
@@ -62,15 +63,15 @@ static void setValues(struct testElement **testElement, char* first, char operat
  *  This fuction creates a test element and add it to our given list of test elements.
  *  @param currentTestNumber, so that we put the new test element in the right place in
  *  our test element list, struct testElement ** our list of test elements, passed by reference, 
- *  char* first, char operator, char* second, int error_code and double expectedResult, all values
+ *  char* first, char operator, char* second, int32_t error_code and double expectedResult, all values
  *  to put in the struct of the new test element 
  *  @return void
  */
-void append(int *currentTestNumber, struct testElement **testElements, char* first, char operator, char* second,
-            int shouldFail, double expectedResult) {
+void append(int32_t *currentTestNumber, struct testElement **testElements, char* first, char operator, char* second,
+            int32_t shouldFail, double expectedResult) {
 	//pointer to fucntion declaration
-	void (*ptrSetValues)(struct testElement**, char*, char, char*, int, double) = &setValues;
-    int temp = *currentTestNumber;
+	void (*ptrSetValues)(struct testElement**, char*, char, char*, int32_t, double) = &setValues;
+    int32_t temp = *currentTestNumber;
 	(*ptrSetValues)(&testElements[temp], first, operator, second, shouldFail, expectedResult);
     *currentTestNumber = temp + 1;
 }
@@ -85,29 +86,29 @@ void append(int *currentTestNumber, struct testElement **testElements, char* fir
  *  In case he wants to execute the program with his own input we call the function MainForDemo()
  *  @return void
  */
-int main(){
+int32_t main(){
 	//pointer to fucntion declaration
-	int (*ptrRunTestOnOneElement)(struct testElement*) = &runTestOnOneElement;
-	int (*ptrMainForDemo)() = &mainForDemo;
-	void (*ptrAppend)(int*, struct testElement**, char*, char, char*, int, double) = &append;
-    int choice;
+	int32_t (*ptrRunTestOnOneElement)(struct testElement*) = &runTestOnOneElement;
+	int32_t (*ptrMainForDemo)() = &mainForDemo;
+	void (*ptrAppend)(int32_t*, struct testElement**, char*, char, char*, int32_t, double) = &append;
+    int32_t choice;
     printf("Hello, press \n 1 to run tests : \n 2 or any key to execute the program with your input : \n");
     scanf_s("%d",&choice,1);
     if(choice==1){//run tests
         struct testElement *testElements[NBR_OF_TESTS];//create a list of tests
-        for (int i = 0; i < NBR_OF_TESTS; i++) {//alocate memory
+        for (int32_t i = 0; i < NBR_OF_TESTS; i++) {//alocate memory
             testElements[i]  = (struct testElement *)malloc(sizeof(struct testElement));
         }
-        int currentTestNumber = 0;
-        int false = 0; //for readability
-        int true = 1;  //for readability
-		int testPassed = true;
+        int32_t currentTestNumber = 0;
+        int32_t false = 0; //for readability
+        int32_t true = 1;  //for readability
+		int32_t testPassed = true;
 		// we dont really want to check if we threw the right error, 
 		//just want to check that an error was thrown, 
 		//we dont consider a wrong error code as a failing test,
 		//but we still notice the user abou that
-		int testPassedButWrongErrorIsTriggered = false;
-		int allTestPassed = true;
+		int32_t testPassedButWrongErrorIsTriggered = false;
+		int32_t allTestPassed = true;
 		//here we create new test element in this manner
 		(*ptrAppend)(&currentTestNumber, testElements,"1", '+', "2", noError, 3);
 		(*ptrAppend)(&currentTestNumber, testElements, "1m", '+', "2",invalidInput, 0);
@@ -120,7 +121,7 @@ int main(){
 		(*ptrAppend)(&currentTestNumber, testElements,"14", '/', "-7", invalidInput, 2);
 		(*ptrAppend)(&currentTestNumber, testElements,"10", '-', "5", noError, 5);
         
-        for (int i = 0; i < NBR_OF_TESTS; i++) {//for all test elements
+        for (int32_t i = 0; i < NBR_OF_TESTS; i++) {//for all test elements
             ERROR_CODE = noError;//reinitialiwe flag ERROR_CODE
 			testPassed = (*ptrRunTestOnOneElement)(testElements[i]);//run test on each element 
             if(ERROR_CODE){
