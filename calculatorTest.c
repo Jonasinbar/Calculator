@@ -33,7 +33,7 @@ struct testElement {
  *  @param struct testElement, the test element to be evaluated
  *  @return 1 if our test element passed, 0 if test failed, -1 if an ERROR_CODE was raised during execution
  */
-int32_t runTestOnOneElement(struct testElement *testElement){
+double runTestOnOneElement(struct testElement *testElement){
 	ERROR_CODE = noError;//just to make sure
 	//pointer to fucntion declaration
 	double (*ptrCalculate) (char*, char, char*, int32_t*, int32_t*) = &calculate;
@@ -87,9 +87,13 @@ void append(int32_t *currentTestNumber, struct testElement **testElements, char*
  *  @return void
  */
 int32_t main(){
+	printf("%f\n",DBL_MAX);
+	double a = 2147483647;
+	double b = 2147483647;
+	double c = a * b;
 	//pointer to fucntion declaration
 	int32_t (*ptrRunTestOnOneElement)(struct testElement*) = &runTestOnOneElement;
-	int32_t (*ptrMainForDemo)() = &mainForDemo;
+	double (*ptrMainForDemo)() = &mainForDemo;
 	void (*ptrAppend)(int32_t*, struct testElement**, char*, char, char*, int32_t, double) = &append;
     int32_t choice;
     printf("Hello, press \n 1 to run tests : \n 2 or any key to execute the program with your input : \n");
@@ -117,9 +121,9 @@ int32_t main(){
 		(*ptrAppend)(&currentTestNumber, testElements,"14", '/', "0", divisionByZero, 0);
 		(*ptrAppend)(&currentTestNumber, testElements,"10", '8', "3", invalidOperator, 1);
 		(*ptrAppend)(&currentTestNumber, testElements,"14rrrrr", '/rrr', "7rrr", invalidOperator, 2);
-		(*ptrAppend)(&currentTestNumber, testElements,"11", '/', "2", noError, 5.5);
+		(*ptrAppend)(&currentTestNumber, testElements,"2", 94, "8", noError, 256);//94 is '^' for some reason if ypu put ^ directly is gives another charcter
 		(*ptrAppend)(&currentTestNumber, testElements,"14", '/', "-7", invalidInput, 2);
-		(*ptrAppend)(&currentTestNumber, testElements,"10", '-', "5", noError, 5);
+		(*ptrAppend)(&currentTestNumber, testElements,"9", '/', "2", noError, 4.5);
         
         for (int32_t i = 0; i < NBR_OF_TESTS; i++) {//for all test elements
             ERROR_CODE = noError;//reinitialiwe flag ERROR_CODE
@@ -132,6 +136,7 @@ int32_t main(){
             ERROR_CODE = noError;//reinitialiwe flag ERROR_CODE
             if(!testPassed){
                 printf("test %d failed!\n",i);
+				testPassedButWrongErrorIsTriggered = false;
 				allTestPassed = false;
             }
 			if (testPassedButWrongErrorIsTriggered) {

@@ -38,11 +38,11 @@ int32_t checkOverflowAndReturnResult(uint64_t result) {
  *  @param int32_t firstInt, int32_t secondInt, the numbers to be added.
  *  @return the sum of the numbers as int32_t, or -1 and raise flag NO_ERROR.
  */
-int32_t add(int32_t firstInt, int32_t secondInt) {
+double add(int32_t firstInt, int32_t secondInt) {
 	//pointer to fucntion declaration
 	int32_t (*ptrCheckOverflowAndReturnResult)(uint64_t) = &checkOverflowAndReturnResult;
 	uint64_t result = (uint64_t)firstInt + (uint64_t)secondInt;
-	return (*ptrCheckOverflowAndReturnResult)(result);
+	return (double)(*ptrCheckOverflowAndReturnResult)(result);
 }
 
 /**
@@ -52,8 +52,8 @@ int32_t add(int32_t firstInt, int32_t secondInt) {
  *  @param int32_t firstInt, int32_t secondInt, the numbers to be substracted.
  *  @return firstInt - secondInt, the substraction as int32_t.
  */
-int32_t substract(int32_t firstInt, int32_t secondInt) {
-	return firstInt - secondInt;
+double substract(int32_t firstInt, int32_t secondInt) {
+	return (double)firstInt - (double)secondInt;
 }
 
 /**
@@ -66,7 +66,7 @@ int32_t substract(int32_t firstInt, int32_t secondInt) {
  *  @param int32_t firstInt, int32_t secondInt, the numbers to be multiply.
  *  @return the multiplication of the number as int32_t, or -1 and raise flag NO_ERROR.
  */
-int32_t multiply(int32_t firstInt, int32_t secondInt) {
+double multiply(int32_t firstInt, int32_t secondInt) {
 	//pointer to fucntion declaration
 	int32_t (*ptrCheckOverflowAndReturnResult)(uint64_t) = &checkOverflowAndReturnResult;
 	uint64_t result = (uint64_t)firstInt * (uint64_t)secondInt;
@@ -97,8 +97,8 @@ double divide(int32_t firstInt, int32_t secondInt) {
  *  @param int32_t firstInt, int32_t secondInt, the numbers to be substracted.
  *  @return firstInt % secondInt, the modulo as int32_t.
  */
-int32_t modulo(int32_t firstInt, int32_t secondInt) {
-	return firstInt % secondInt;
+double modulo(int32_t firstInt, int32_t secondInt) {
+	return (double)(firstInt % secondInt);
 }
 
 /**
@@ -114,7 +114,7 @@ int32_t modulo(int32_t firstInt, int32_t secondInt) {
  *  @param int32_t firstInt, the base and int32_t secondInt the exponent.
  *  @return the powering of the number as int32_t, or -1 and flag NO_ERROR will be raised.
  */
-int32_t power(int32_t firstInt, int32_t secondInt) {
+double power(int32_t firstInt, int32_t secondInt) {
 	//pointer to fucntion declaration
 	int32_t (*ptrMultiply)(int32_t, int32_t) = &multiply;
 	//basic case, power of 0 
@@ -129,13 +129,13 @@ int32_t power(int32_t firstInt, int32_t secondInt) {
 	//here we do firstInt*firstInt*...*firstInt, 'secondInt' times
 	for (int32_t i = 0; i < secondInt - 1; ++i)
 	{
-		result = (*ptrMultiply)(result, firstInt); //our multiply is safe from int32_t overflow
+		result = (*ptrMultiply)((int)result, firstInt); //our multiply is safe from int32_t overflow
 		//if flag errorCode was raised by multiply, we better stop now
 		if (ERROR_CODE) {
 			return -1; //doesnt matter
 		}
 	}
-	return result;
+	return (double)result;
 }
 /**
  *  This fuction takes two int32_t as input, calculate the secondInt'th root of firstInt as a
@@ -162,12 +162,45 @@ double nthRoot(int32_t firstInt, int32_t secondInt) {
  *  @param int32_t firstInt, int32_t secondInt, the numbers to be divided.
  *  @return the division of the number as double, or -1 and raise flag NO_ERROR.
  */
-int32_t euclideanDivision(int32_t first, int32_t second) {
+double euclideanDivision(int32_t first, int32_t second) {
 	if (second == 0) {
 		ERROR_CODE = divisionByZero;
 		return -1;//doesnt matter
 	}
 	return first / second;
+}
+
+int chooseRightOperation(char operator) {
+	switch (operator) {
+	case '+':
+		return 0;
+		break;
+	case '-':
+		return 1;
+		break;
+	case '*':
+		return 2;
+		break;
+	case '/':
+		return 3;
+		break;
+	case '%':
+		return 4;
+		break;
+	case 'r':
+		return 5;
+		break;
+	case '^':
+		return 6;
+		break;
+	case ':':
+		return 7;
+		break;
+	default:
+		// if operator is not in the set {+, -, *, /, %, r, ^, :}
+		ERROR_CODE = invalidOperator;
+		return -1;//doesnt matter
+	}
 }
 /**
  *  This fuction takes two int32_t as input and the operator,
@@ -181,49 +214,14 @@ int32_t euclideanDivision(int32_t first, int32_t second) {
  *  through called operation fucntion or in case of operator not recongnized.
  */
 double executeOperation(int32_t first, char operator, int32_t second) {
-	//pointer to fucntion declaration
-	int32_t (*ptrAdd)(int32_t, int32_t) = &add;
-	int32_t (*ptrSubstract)(int32_t, int32_t) = &substract;
-	int32_t (*ptrMultiply)(int32_t, int32_t) = &multiply;
-	double (*ptrDivide)(int32_t, int32_t) = &divide;
-	int32_t (*ptrModulo)(int32_t, int32_t) = &modulo;
-	double (*ptrNthRoot)(int32_t, int32_t) = &nthRoot;
-	int32_t (*ptrPower)(int32_t, int32_t) = &power;
-	double (*ptrEuclideanDivision)(int32_t, int32_t) = &euclideanDivision;
-
-	switch (operator) {
-	case '+':
-		return (*ptrAdd)(first, second);
-		break;
-	case '-':
-		return (*ptrSubstract)(first, second);
-		break;
-	case '*':
-		return (*ptrMultiply)(first, second);
-		break;
-	case '/':
-		return (*ptrDivide)(first, second);
-		break;
-	case '%':
-		return (*ptrModulo)(first, second);
-		break;
-	case 'r':
-		return (*ptrNthRoot)(first, second);
-		break;
-	case '^':
-		return (*ptrPower)(first, second);
-		break;
-	case ':':
-		return (*ptrEuclideanDivision)(first, second);
-		break;
-
-	default:
-		// if operator is not in the set {+, -, *, /, %, r, ^, :}
-		ERROR_CODE = invalidOperator;
-		return -1;//doesnt matter
+	double (*fun_ptr_arr[])(int32_t, int32_t) = { add, substract, multiply, divide, modulo, nthRoot, power, euclideanDivision };
+	int rightOerationNumber = chooseRightOperation(operator);
+	if (rightOerationNumber == -1) {
+		return -1; //doesnt matter, in this case ERROR_CODE flage is raised
 	}
-
+	return (*fun_ptr_arr[rightOerationNumber])(first, second);
 }
+
 
 /**
  *  This fuction takes a string as input,
@@ -395,7 +393,7 @@ void printResult(double result) {
  *  the prgram with our own inputs. It asks for the two nubers and the operator, 
  
  */
-int32_t mainForDemo() {
+double mainForDemo() {
 	//pointer to fucntion declaration
 	double (*ptrCalculate) (char*, char, char*, int32_t*, int32_t*) = &calculate;
 	void (*ptrPrintResult) (double) = &printResult;

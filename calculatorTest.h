@@ -14,7 +14,7 @@
 extern int32_t ERROR_CODE;
 void append(int32_t* currentTestNumber, struct testElement** testElements, char* first, char operator, char* second, int32_t shouldFail, double expectedResult);
 int32_t main();
-int32_t runTestOnOneElement(struct testElement* testElement);
+double runTestOnOneElement(struct testElement* testElement);
 static void setValues(struct testElement** testElement, char* first, char operator, char* second, int32_t shouldFail, double expectedResult);
 
 
